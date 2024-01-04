@@ -77,30 +77,22 @@ grid on; grid minor;
 ax = gca;
 ax.XAxis.Exponent = 3;
 
-% Número de muestras para el filtro en el dominio del tiempo
-num_muestras = length(filtro_paso_bajo);
-
-% Construcción del filtro en el dominio del tiempo (usando la transformada inversa)
-filtro_tiempo = ifft(ifftshift(filtro_paso_bajo)); % Transformada inversa y desplazamiento
-
-% Reorganización del filtro para centrarlo
-filtro_tiempo = fftshift(filtro_tiempo);
-
-% Escalamiento para la representación en el dominio del tiempo
-filtro_tiempo = real(filtro_tiempo); % Se toma solo la parte real
+% Transformada inversa para pasar el filtro al dominio del tiempo
+filtro_tiempo = fftshift(ifft(filtro_paso_bajo)); % Transformada inversa
 
 % Gráfico del filtro paso bajo en el dominio del tiempo
 figure();
-plot(num_muestras,filtro_tiempo);
+plot(t_filtro, abs(filtro_tiempo)/max());
 title("Low Pass Filter (Time Domain)");
-xlabel("Muestras");
+xlabel("Tiempo [s]");
 ylabel("Amplitud");
-grid on; grid minor;
-% Reconstrucción de la señal a partir del espectro filtrado
+grid on;
+
+%% Reconstrucción de la señal a partir del espectro filtrado
 audio_filtrado = ifft(fftshift(espectro_filtrado)); % Transformada inversa
 audio_filtrado = real(audio_filtrado); % Se toma solo la parte real
 
 % Reproducción de audios procesados
-sound(audio_filtrado,frecuencia_muestreo); % Audio filtrado
-pause( duracion_audio + 1 );
-sound(senal_promediada, frecuencia_muestreo); % Audio original
+%sound(audio_filtrado,frecuencia_muestreo); % Audio filtrado
+%pause( duracion_audio + 1 );
+%sound(senal_promediada, frecuencia_muestreo); % Audio original
