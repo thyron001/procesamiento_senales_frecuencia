@@ -1,118 +1,106 @@
 clc;
 clear all;
 
-%%
+%% Importación del audio
+% Se lee el archivo de audio "audio.wav"
+[datos_audio, frecuencia_muestreo] = audioread("audio.wav");
 
-%Importacion del audio
-[a, fs] = audioread("audio.wav");
+% Se calcula la duración del audio
+duracion_audio = length(datos_audio) / frecuencia_muestreo;
 
-d = length(a)/fs;
+% Se obtiene la señal promediada de ambos canales de audio
+senal_promediada = 0.5 * (datos_audio(:, 1) + datos_audio(:, 2)).'; % Transpuesta
 
-%.' Transpuesta
-a_m = 0.5 * (a(:,1) + a(:,2)).';
-
-% Waveform plot
-
-t = linspace(0, d, length(a_m));
-
+% Gráfico de la forma de onda del audio
+tiempo = linspace(0, duracion_audio, length(senal_promediada));
 figure();
-plot(t, a_m);
+plot(tiempo, senal_promediada);
 title("Audio waveform");
 xlabel("Tiempo [s]");
 ylabel("Amplitud");
 grid on;
 
-%Frecuencia
+% Análisis en frecuencia
+espectro_audio = fftshift(fft(senal_promediada)); % Transformada de Fourier centrada
+frecuencias = linspace(-frecuencia_muestreo/2, frecuencia_muestreo/2, length(espectro_audio));
+mag_espectro = abs(espectro_audio);
 
-A_m = fftshift(fft(a_m));
-
-f = linspace(-fs/2, fs/2, length(A_m));
-
-mag_A = abs(A_m);
-
+% Gráfico del espectro de frecuencia del audio
 figure();
-plot(f, mag_A/max(mag_A));
+plot(frecuencias, mag_espectro/max(mag_espectro));
 title("Espectro de frecuencia del Audio");
 xlabel("Frecuencia [Hz]");
 ylabel("Amplitud");
 grid on, grid minor;
-
 ax = gca;
 ax.XAxis.Exponent = 3;
 
+% Creación de Filtros ideales
 
+% Filtro paso bajo
+filtro_paso_bajo = 1.*(abs(frecuencias)<=500); % Filtro que mantiene frecuencias menores a 500 Hz
 
-
-
-%******************************************************************
-%******************************************************************
-                    %Creación de Filtros ideales
-%******************************************************************
-%******************************************************************
-
-%==================================================================
-%                   Filtro paso bajo
-%==================================================================
-
-%% Generación del filtro
-
-%Filtrado de los valores en frecuencia que esten entre los 500KHz
-lpf = 1.*(abs(f)<=500); 
-
-%% Grafica del filtro
-
+% Gráfico del filtro paso bajo
 figure();
-plot(f, lpf,'r');
-%------------------------------------------
+plot(frecuencias, filtro_paso_bajo,'r');
 title("Low Pass Filter");
-xlabel("Frequency[Hz]");
-ylabel("Amplitude");
+xlabel("Frecuencia [Hz]");
+ylabel("Amplitud");
 grid on; grid minor;
 ax = gca;
 ax.XAxis.Exponent = 3;
-%------------------------------------------
 
-%% Grafica de la superposición del filtro y el espectro de la senial de Audio 
-
+% Superposición del filtro y el espectro de la señal de Audio
 figure();
-plot( f, mag_A/max(mag_A) );%Graficar el espectro
+plot(frecuencias, mag_espectro/max(mag_espectro)); % Espectro de frecuencia original
 hold on;
-plot(f,lpf,'r');            %Superponer el filtro
-%------------------------------------------
+plot(frecuencias, filtro_paso_bajo,'r'); % Superposición del filtro
 legend("Audio","Filter");
-xlabel("Frequency[Hz]");
-ylabel("Amplitude");
+xlabel("Frecuencia [Hz]");
+ylabel("Amplitud");
 grid on; grid minor;
 ax = gca;
 ax.XAxis.Exponent = 3;
-%------------------------------------------
 
-%% Aplicacion del filtro
+% Aplicación del filtro
+espectro_filtrado = espectro_audio .* filtro_paso_bajo;
 
-A_lpf = A_m .* lpf;
-
+% Gráfico del espectro de frecuencia filtrado y superposición con el filtro
 figure()
-plot( f, abs(A_lpf)/max(abs(A_lpf)) );%Graficar el filtrado
+plot(frecuencias, abs(espectro_filtrado)/max(abs(espectro_filtrado))); % Espectro filtrado
 hold on;
-plot(f,lpf,'r');                      %Superponer el filtro
-%------------------------------------------
+plot(frecuencias, filtro_paso_bajo,'r'); % Superposición del filtro
 legend("Filtered Frequencies","Filter");
-xlabel("Frequency[Hz]");
-ylabel("Amplitude");
+xlabel("Frecuencia [Hz]");
+ylabel("Amplitud");
 grid on; grid minor;
 ax = gca;
 ax.XAxis.Exponent = 3;
-%------------------------------------------
 
-%% Reconstrucción de la señal a partir del espectro filtrado
+% Número de muestras para el filtro en el dominio del tiempo
+num_muestras = length(filtro_paso_bajo);
 
-%Retorno del desplazamiento  y trasformada inversa
-a_lpf = ifft( fftshift(A_lpf));
+% Construcción del filtro en el dominio del tiempo (usando la transformada inversa)
+filtro_tiempo = ifft(ifftshift(filtro_paso_bajo)); % Transformada inversa y desplazamiento
 
-%Se considera unicamente la parte real de la transformada inversa
-a_lpf = real(a_lpf);
+% Reorganización del filtro para centrarlo
+filtro_tiempo = fftshift(filtro_tiempo);
 
-%% Reproducción de audios procesados
-sound(a_lpf,fs);
-pause( d + 1 );
-sound( a_m, fs );
+% Escalamiento para la representación en el dominio del tiempo
+filtro_tiempo = real(filtro_tiempo); % Se toma solo la parte real
+
+% Gráfico del filtro paso bajo en el dominio del tiempo
+figure();
+plot(num_muestras,filtro_tiempo);
+title("Low Pass Filter (Time Domain)");
+xlabel("Muestras");
+ylabel("Amplitud");
+grid on; grid minor;
+% Reconstrucción de la señal a partir del espectro filtrado
+audio_filtrado = ifft(fftshift(espectro_filtrado)); % Transformada inversa
+audio_filtrado = real(audio_filtrado); % Se toma solo la parte real
+
+% Reproducción de audios procesados
+sound(audio_filtrado,frecuencia_muestreo); % Audio filtrado
+pause( duracion_audio + 1 );
+sound(senal_promediada, frecuencia_muestreo); % Audio original
