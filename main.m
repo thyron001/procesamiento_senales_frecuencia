@@ -93,6 +93,6 @@ audio_filtrado = ifft(fftshift(espectro_filtrado)); % Transformada inversa
 audio_filtrado = real(audio_filtrado); % Se toma solo la parte real
 
 % Reproducción de audios procesados
-%sound(audio_filtrado,frecuencia_muestreo); % Audio filtrado
-%pause( duracion_audio + 1 );
-%sound(senal_promediada, frecuencia_muestreo); % Audio original
+sound(audio_filtrado,frecuencia_muestreo); % Audio filtrado
+pause( duracion_audio + 1 );
+sound(senal_promediada, frecuencia_muestreo); % Audio original
