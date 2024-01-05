@@ -131,7 +131,7 @@ grid on;
 
 %% Transformada inversa para pasar el filtro al dominio del tiempo
 o = length(tiempo)/2;
-r = [o-1000:o+1000];
+r = o-1000:o+1000;
 %%--------------------------filtro paso bajo------------------------------%%
 lpf_tiempo = fftshift(ifft(fftshift(filtro_paso_bajo))); % Transformada inversa
 lpf_tiempo = lpf_tiempo/max(lpf_tiempo);
