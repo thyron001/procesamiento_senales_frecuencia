@@ -1,10 +1,10 @@
 clc;
-clear all;
+clear ;
 close all;
 
 %% Importación del audio
 % Se lee el archivo de audio "audio.wav"
-[datos_audio, frecuencia_muestreo] = audioread("audio.wav");
+[datos_audio, frecuencia_muestreo] = audioread("rain.wav");
 
 % Se calcula la duración del audio
 duracion_audio = length(datos_audio) / frecuencia_muestreo;
@@ -76,7 +76,7 @@ grid on;
 %% Transformada inversa para pasar el filtro al dominio del tiempo
 filtro_tiempo = fftshift(ifft(fftshift(filtro_paso_bajo))); % Transformada inversa
 o = length(tiempo)/2;
-r = [o-1000:o+1000];
+r = o-1000:o+1000;
 filtro_tiempo = filtro_tiempo/max(filtro_tiempo);
 t_filtro = linspace(-duracion_audio/2, duracion_audio/2, length(filtro_tiempo));
 % Gráfico del filtro paso bajo en el dominio del tiempo

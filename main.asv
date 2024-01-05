@@ -4,7 +4,7 @@ close all;
 
 %% Importación del audio
 % Se lee el archivo de audio "audio.wav"
-[datos_audio, frecuencia_muestreo] = audioread("audio.wav");
+[datos_audio, frecuencia_muestreo] = audioread("rain.wav");
 
 % Se calcula la duración del audio
 duracion_audio = length(datos_audio) / frecuencia_muestreo;
@@ -38,7 +38,7 @@ filtro_paso_bajo = 1.*(abs(frecuencias)<=500); % Filtro que mantiene frecuencias
 
 % Gráfico del filtro paso bajo
 subplot(3,1,2);
-plot(frecuencias_array, filtro_paso_bajo,'r');
+plot(frecuencias, filtro_paso_bajo,'r');
 title("Filtro Pasa Bajo");
 xlabel("Frecuencia [Hz]");
 ylabel("Amplitud");
@@ -51,7 +51,7 @@ espectro_filtrado = espectro_audio .* filtro_paso_bajo;
 
 % Gráfico del espectro de frecuencia filtrado y superposición con el filtro
 subplot(3,1,3);
-plot(frecuencias_array, abs(espectro_filtrado)/max(abs(espectro_filtrado))); % Espectro filtrado
+plot(frecuencias, abs(espectro_filtrado)/max(abs(espectro_filtrado))); % Espectro filtrado
 hold on;
 plot(frecuencias, filtro_paso_bajo,'r'); % Superposición del filtro
 legend("Frecuencias filtradas","Filtro");
